@@ -22,7 +22,7 @@ if exist "%REF_DIR%\*.dll" (
 
     for %%f in ("%REF_DIR%\*.dll") do (
         copy /Y "%%f" "%OUT_DIR%\" >nul
-        set "REFS=!REFS! /reference:"%OUT_DIR%\%%~nxf""
+        set "REFS=!REFS! /reference:"%OUT_DIR%\%%~nxf"
     )
 )
 
