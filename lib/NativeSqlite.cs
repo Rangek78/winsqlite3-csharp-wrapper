@@ -31,7 +31,7 @@ namespace MySqlite
         internal static extern IntPtr sqlite3_errmsg(IntPtr db);
 
         [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
-        internal static extern int sqlite3_prepare_v2(IntPtr db, IntPtr sql, int sqlLength, IntPtr statement, IntPtr tail);
+        internal static extern int sqlite3_prepare_v2(IntPtr db, IntPtr sql, int sqlLength, out IntPtr statement, IntPtr tail);
 
         [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int sqlite3_step(IntPtr statement);
