@@ -28,17 +28,36 @@ namespace MySqlite
             }
         }
 
-        public void BindText(int parameter, string value)
+        public void BindValue(int parameter, object value)
+        {
+            int result;
+
+            if (value == null)
+                result = BindNull(parameter);
+            else if (value is string)
+                result = BindText(parameter, (string)value);
+            else if (value is byte[])
+                result = BindBlob(parameter, (byte[])value);
+            else if (value is long)
+                result = BindInt64(parameter, (long)value);
+            else if (value is double)
+                result = BindDouble(parameter, (double)value);
+            else
+                throw new ArgumentException("Unsupported SQLite parameter type: " + value.GetType().FullName);
+
+            if (result != NativeSqlite.SQLITE_OK)
+                ThrowDbException(result);
+        }
+
+        public int BindText(int parameter, string value)
         {
             GCHandle handle;
             IntPtr valuePointer = Utf8.GetPointer(value, out handle);
 
             try
             {
-                int result = NativeSqlite.sqlite3_bind_text(_handle, parameter, valuePointer, -1, NativeSqlite.SQLITE_TRANSIENT);
+                return NativeSqlite.sqlite3_bind_text(_handle, parameter, valuePointer, -1, NativeSqlite.SQLITE_TRANSIENT);
 
-                if (result != NativeSqlite.SQLITE_OK)
-                    ThrowDbException(result);
             }
             finally
             {
@@ -46,21 +65,33 @@ namespace MySqlite
             }
         }
 
-        public void BindBlob(int parameter, byte[] value)
+        public int BindBlob(int parameter, byte[] value)
         {
             GCHandle handle = GCHandle.Alloc(value, GCHandleType.Pinned);
 
             try
             {
-                int result = NativeSqlite.sqlite3_bind_blob(_handle, parameter, handle.AddrOfPinnedObject(), value.Length, NativeSqlite.SQLITE_TRANSIENT);
-
-                if (result != NativeSqlite.SQLITE_OK)
-                    ThrowDbException(result);
+                return NativeSqlite.sqlite3_bind_blob(_handle, parameter, handle.AddrOfPinnedObject(), value.Length, NativeSqlite.SQLITE_TRANSIENT);
             }
             finally
             {
                 handle.Free();
             }
+        }
+
+        public int BindInt64(int parameter, long value)
+        {
+            return NativeSqlite.sqlite3_bind_int64(_handle, parameter, value);
+        }
+
+        public int BindDouble(int parameter, double value)
+        {
+            return NativeSqlite.sqlite3_bind_double(_handle, parameter, value);
+        }
+
+        public int BindNull(int parameter)
+        {
+            return NativeSqlite.sqlite3_bind_null(_handle, parameter);
         }
 
         public int Step()
