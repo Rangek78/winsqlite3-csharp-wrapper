@@ -6,20 +6,21 @@ namespace MySqlite
 {
     internal sealed class SqliteStatement : IDisposable
     {
+        private IntPtr _database;
         private IntPtr _handle;
 
         public SqliteStatement(IntPtr database, string sql)
         {
+            _database = database;
             GCHandle handle;
-
             IntPtr sqlPointer = Utf8.GetPointer(sql, out handle);
 
             try
             {
-                int result = NativeSqlite.sqlite3_prepare_v2(database, sqlPointer, -1, out _handle, IntPtr.Zero);
+                int result = NativeSqlite.sqlite3_prepare_v2(_database, sqlPointer, -1, out _handle, IntPtr.Zero);
 
                 if (result != NativeSqlite.SQLITE_OK)
-                    throw new Exception("SQLite error " + result);
+                    ThrowDbException(result);
             }
             finally
             {
@@ -52,7 +53,7 @@ namespace MySqlite
                     break;
 
                 if (result != NativeSqlite.SQLITE_ROW)
-                    throw new Exception("SQLite error " + result);
+                    ThrowDbException(result);
 
                 rows.Add(ReadRow(columnCount));
             }
@@ -90,12 +91,35 @@ namespace MySqlite
                     IntPtr textPointer = NativeSqlite.sqlite3_column_text(_handle, column);
                     return Utf8.PtrToString(textPointer);
 
+                case NativeSqlite.SQLITE_BLOB:
+                    IntPtr blobPointer = NativeSqlite.sqlite3_column_blob(_handle, column);
+                    int blobSize = NativeSqlite.sqlite3_column_bytes(_handle, column);
+
+                    byte[] blob = new byte[blobSize];
+
+                    if (blobSize > 0)
+                        Marshal.Copy(blobPointer, blob, 0, blobSize);
+
+                    return blob;
+
                 case NativeSqlite.SQLITE_NULL:
                     return null;
 
                 default:
                     return null;
             }
+        }
+
+        private void ThrowDbException(int result)
+        {
+            string error = GetErrorMessage();
+            throw new SqliteException(result, error);
+        }
+
+        private string GetErrorMessage()
+        {
+            IntPtr message = NativeSqlite.sqlite3_errmsg(_database);
+            return Utf8.PtrToString(message);
         }
 
         public void Dispose()
