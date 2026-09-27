@@ -16,6 +16,8 @@ namespace MySqlite
         internal const int SQLITE_BLOB = 4;
         internal const int SQLITE_NULL = 5;
 
+        internal static readonly IntPtr SQLITE_TRANSIENT = new IntPtr(-1);
+
         internal delegate int SqliteExecCallback(IntPtr userData, int columnCount, IntPtr values, IntPtr columnNames);
 
         [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
@@ -62,6 +64,9 @@ namespace MySqlite
 
         [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int sqlite3_column_bytes(IntPtr statement, int column);
+
+        [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int sqlite3_bind_text(IntPtr statement, int parameter, IntPtr value, int length, IntPtr destructor);
     }
 }
 

@@ -28,6 +28,24 @@ namespace MySqlite
             }
         }
 
+        public void BindText(int parameter, string value)
+        {
+            GCHandle handle;
+            IntPtr valuePointer = Utf8.GetPointer(value, out handle);
+
+            try
+            {
+                int result = NativeSqlite.sqlite3_bind_text(_handle, parameter, valuePointer, -1, NativeSqlite.SQLITE_TRANSIENT);
+
+                if (result != NativeSqlite.SQLITE_OK)
+                    ThrowDbException(result);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
         public int Step()
         {
             return NativeSqlite.sqlite3_step(_handle);
