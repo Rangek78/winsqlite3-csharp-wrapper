@@ -67,6 +67,9 @@ namespace MySqlite
 
         [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int sqlite3_bind_text(IntPtr statement, int parameter, IntPtr value, int length, IntPtr destructor);
+
+        [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
+        internal static extern int sqlite3_bind_blob(IntPtr statement, int parameter, IntPtr value, int length, IntPtr destructor);
     }
 }
 

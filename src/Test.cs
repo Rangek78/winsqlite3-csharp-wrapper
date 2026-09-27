@@ -7,9 +7,17 @@ class Test
     {
         using (SqliteDatabase db = new SqliteDatabase("test.db"))
         {
-            using (SqliteStatement statement = db.Prepare( "INSERT INTO people (name) VALUES (?)"))
+            byte[] data = new byte[]
             {
-                statement.BindText(1, "Alice");
+                0x01,
+                0x02,
+                0x00,
+                0xFF
+            };
+
+            using (SqliteStatement statement = db.Prepare("INSERT INTO blobs (data) VALUES (?)"))
+            {
+                statement.BindBlob(1, data);
 
                 int result = statement.Step();
 

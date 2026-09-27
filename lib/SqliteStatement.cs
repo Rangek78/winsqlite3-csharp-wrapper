@@ -46,6 +46,23 @@ namespace MySqlite
             }
         }
 
+        public void BindBlob(int parameter, byte[] value)
+        {
+            GCHandle handle = GCHandle.Alloc(value, GCHandleType.Pinned);
+
+            try
+            {
+                int result = NativeSqlite.sqlite3_bind_blob(_handle, parameter, handle.AddrOfPinnedObject(), value.Length, NativeSqlite.SQLITE_TRANSIENT);
+
+                if (result != NativeSqlite.SQLITE_OK)
+                    ThrowDbException(result);
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }
+
         public int Step()
         {
             return NativeSqlite.sqlite3_step(_handle);
