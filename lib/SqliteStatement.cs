@@ -4,7 +4,7 @@ using System.Runtime.InteropServices;
 
 namespace MySqlite
 {
-    internal sealed class SqliteStatement : IDisposable
+    public sealed class SqliteStatement : IDisposable
     {
         private IntPtr _database;
         private IntPtr _handle;

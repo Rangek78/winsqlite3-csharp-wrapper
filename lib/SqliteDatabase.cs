@@ -73,6 +73,11 @@ namespace MySqlite
             return grid;
         }
 
+        public SqliteStatement Prepare(string sql)
+        {
+            return new SqliteStatement(_handle, sql);
+        }
+
         public void Dispose()
         {
             if (_handle != IntPtr.Zero)
