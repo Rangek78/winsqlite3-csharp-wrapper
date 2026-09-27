@@ -62,22 +62,6 @@ namespace MySqlite
 
         [DllImport("winsqlite3.dll", CallingConvention = CallingConvention.Cdecl)]
         internal static extern int sqlite3_column_bytes(IntPtr statement, int column);
-
-        internal static string PtrToStringUtf8(IntPtr pointer)
-        {
-            if (pointer == IntPtr.Zero)
-                return null;
-
-            int length = 0;
-
-            while (Marshal.ReadByte(pointer, length) != 0)
-                length++;
-
-            byte[] bytes = new byte[length];
-            Marshal.Copy(pointer, bytes, 0, length);
-
-            return Encoding.UTF8.GetString(bytes);
-        }
     }
 }
 

@@ -15,7 +15,7 @@ namespace MySqlite
 
             if (result != 0)
             {
-                string error = GerErrorMessage();
+                string error = GetErrorMessage();
                 if (_handle != IntPtr.Zero)
                 {
                     NativeSqlite.sqlite3_close(_handle);
@@ -84,17 +84,18 @@ namespace MySqlite
 
         private void ThrowDbException(int result)
         {
-            string error = GerErrorMessage();
-            throw new Exception("SQLite error " + result + ": " + error);
+            string error = GetErrorMessage();
+            throw new SqliteException(result, error);
         }
 
-        private string GerErrorMessage()
+        private string GetErrorMessage()
         {
             if (_handle == IntPtr.Zero)
                 return "Unknown SQLite error.";
+
             IntPtr message = NativeSqlite.sqlite3_errmsg(_handle);
 
-            return Marshal.PtrToStringAnsi(message);
+            return Utf8.PtrToString(message);
         }
     }
 }
